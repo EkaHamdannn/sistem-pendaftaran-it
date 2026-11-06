@@ -66,7 +66,7 @@ Untuk mengakses panel admin, navigasikan browser ke URL login:
 
 1. **Clone Repository & Nyalakan Layanan Database**
    ```bash
-   git clone https://github.com/<username>/sistem-pendaftaran-it.git
+   git clone https://github.com/EkaHamdannn/sistem-pendaftaran-it.git
    cd sistem-pendaftaran-it
    ```
    Pastikan service **Apache** dan **MySQL** pada control panel XAMPP sudah berjalan (*running*).
