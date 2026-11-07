@@ -118,19 +118,28 @@
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-end pe-3">
-                                    <?php if ($p['status'] === 'Terdaftar'): ?>
-                                        <form action="<?= base_url('/admin/peserta/batalkan/' . $p['id']) ?>" 
+                                    <div class="d-inline-flex gap-1 justify-content-end">
+                                        <?php if ($p['status'] === 'Terdaftar'): ?>
+                                            <form action="<?= base_url('/admin/peserta/batalkan/' . $p['id']) ?>" 
+                                                  method="post" 
+                                                  class="d-inline"
+                                                  onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pendaftaran peserta <?= esc($p['nama'], 'js') ?>? Sisa kuota pelatihan akan bertambah 1.');">
+                                                <?= csrf_field() ?>
+                                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Batalkan Pendaftaran">
+                                                    <i class="bi bi-x-circle me-1"></i>Batalkan
+                                                </button>
+                                            </form>
+                                        <?php endif; ?>
+                                        <form action="<?= base_url('/admin/peserta/hapus/' . $p['id']) ?>" 
                                               method="post" 
                                               class="d-inline"
-                                              onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pendaftaran peserta <?= esc($p['nama'], 'js') ?>? Sisa kuota pelatihan akan bertambah 1.');">
+                                              onsubmit="return confirm('Apakah Anda yakin ingin menghapus data peserta <?= esc($p['nama'], 'js') ?> secara permanen?');">
                                             <?= csrf_field() ?>
-                                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                                <i class="bi bi-x-circle me-1"></i>Batalkan
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus Data Peserta">
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
-                                    <?php else: ?>
-                                        <span class="text-muted small">&mdash;</span>
-                                    <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

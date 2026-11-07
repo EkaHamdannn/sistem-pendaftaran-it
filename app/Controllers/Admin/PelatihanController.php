@@ -275,31 +275,46 @@ class PelatihanController extends Controller
 
     /**
      * POST /admin/pelatihan/hapus/{id} — Hapus data pelatihan.
-     * Menangkap kegagalan foreign key (ON DELETE RESTRICT) dengan pesan ramah.
+     * Menggunakan transaksi database agar data pendaftaran terkait ikut terhapus
+     * secara bersih (cascade delete otomatis) langsung dari UI tanpa perlu membuka phpMyAdmin.
      */
     public function hapus($id = null)
     {
-        $pelatihanId    = (int) $id;
-        $pelatihanModel = new PelatihanModel();
+        $pelatihanId      = (int) $id;
+        $pelatihanModel   = new PelatihanModel();
+        $pendaftaranModel = new PendaftaranModel();
 
         $pelatihan = $pelatihanModel->getPelatihanById($pelatihanId);
         if (! $pelatihan) {
             return redirect()->to('/admin/pelatihan')->with('error', 'Pelatihan tidak ditemukan.');
         }
 
+        $db = \Config\Database::connect();
+        $db->transBegin();
+
         try {
+            // 1. Hapus seluruh data pendaftaran terkait pelatihan ini terlebih dahulu
+            $pendaftaranModel->where('pelatihan_id', $pelatihanId)->delete();
+
+            // 2. Hapus data pelatihan
             $pelatihanModel->delete($pelatihanId);
+
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                return redirect()->to('/admin/pelatihan')->with(
+                    'error',
+                    'Terjadi kesalahan database saat menghapus pelatihan.'
+                );
+            }
+
+            $db->transCommit();
+
             return redirect()->to('/admin/pelatihan')->with(
                 'success',
-                'Pelatihan "' . esc($pelatihan['judul']) . '" berhasil dihapus.'
-            );
-        } catch (DatabaseException $e) {
-            // Tangkap kegagalan RESTRICT foreign key
-            return redirect()->to('/admin/pelatihan')->with(
-                'error',
-                'Pelatihan "' . esc($pelatihan['judul']) . '" tidak dapat dihapus karena masih memiliki data riwayat pendaftaran peserta.'
+                'Pelatihan "' . esc($pelatihan['judul']) . '" beserta seluruh riwayat pendaftarannya berhasil dihapus.'
             );
         } catch (\Throwable $e) {
+            $db->transRollback();
             return redirect()->to('/admin/pelatihan')->with(
                 'error',
                 'Gagal menghapus pelatihan: ' . $e->getMessage()

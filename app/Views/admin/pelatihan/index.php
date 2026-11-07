@@ -91,7 +91,7 @@
                                         <form action="<?= base_url('/admin/pelatihan/hapus/' . $item['id']) ?>" 
                                               method="post" 
                                               class="d-inline"
-                                              onsubmit="return confirm('Apakah Anda yakin ingin menghapus pelatihan: <?= esc($item['judul'], 'js') ?>?');">
+                                              onsubmit="return confirm('Peringatan: Menghapus pelatihan ini akan otomatis menghapus seluruh data pendaftaran peserta di dalamnya.\n\nApakah Anda yakin ingin menghapus: <?= esc($item['judul'], 'js') ?>?');">
                                             <?= csrf_field() ?>
                                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus Pelatihan">
                                                 <i class="bi bi-trash"></i>

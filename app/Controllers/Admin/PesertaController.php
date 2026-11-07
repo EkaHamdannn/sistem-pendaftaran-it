@@ -115,4 +115,56 @@ class PesertaController extends Controller
             );
         }
     }
+
+    /**
+     * POST /admin/peserta/hapus/{id} — Hapus data riwayat pendaftaran peserta secara permanen langsung dari UI.
+     */
+    public function hapus($id = null)
+    {
+        $pendaftaranId    = (int) $id;
+        $pendaftaranModel = new PendaftaranModel();
+
+        $pendaftaran = $pendaftaranModel->find($pendaftaranId);
+        if (! $pendaftaran) {
+            return redirect()->to('/admin/pelatihan')->with('error', 'Data pendaftaran tidak ditemukan.');
+        }
+
+        $pelatihanId = (int) $pendaftaran['pelatihan_id'];
+        $db = Database::connect();
+        $db->transBegin();
+
+        try {
+            // Jika peserta berstatus 'Terdaftar', kembalikan kuota + 1
+            if ($pendaftaran['status'] === 'Terdaftar') {
+                $db->query(
+                    "UPDATE pelatihan SET sisa_kuota = sisa_kuota + 1, status = 'Tersedia' WHERE id = ?",
+                    [$pelatihanId]
+                );
+            }
+
+            // Hapus data pendaftaran
+            $pendaftaranModel->delete($pendaftaranId);
+
+            if ($db->transStatus() === false) {
+                $db->transRollback();
+                return redirect()->to('/admin/peserta/' . $pelatihanId)->with(
+                    'error',
+                    'Terjadi kesalahan saat menghapus data peserta.'
+                );
+            }
+
+            $db->transCommit();
+
+            return redirect()->to('/admin/peserta/' . $pelatihanId)->with(
+                'success',
+                'Data peserta ' . esc($pendaftaran['nama']) . ' berhasil dihapus secara permanen.'
+            );
+        } catch (\Throwable $e) {
+            $db->transRollback();
+            return redirect()->to('/admin/peserta/' . $pelatihanId)->with(
+                'error',
+                'Gagal menghapus data peserta: ' . $e->getMessage()
+            );
+        }
+    }
 }

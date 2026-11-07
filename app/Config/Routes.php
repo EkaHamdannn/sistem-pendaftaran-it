@@ -48,4 +48,5 @@ $routes->group('admin', ['filter' => 'auth'], function ($routes) {
     // Daftar Peserta per Pelatihan
     $routes->get('peserta/(:num)', 'Admin\PesertaController::index/$1');
     $routes->post('peserta/batalkan/(:num)', 'Admin\PesertaController::batalkan/$1');
+    $routes->post('peserta/hapus/(:num)', 'Admin\PesertaController::hapus/$1');
 });
